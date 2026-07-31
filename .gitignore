@@ -1,0 +1,8 @@
+node_modules/
+.npm/
+.ssh/
+.config/
+.gitconfig
+.env
+*.key
+start-baiyouSave*
