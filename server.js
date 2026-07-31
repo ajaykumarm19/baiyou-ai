@@ -1,4 +1,4 @@
-import http from "http";
+ import http from "http";
 import { GoogleGenAI } from "@google/genai";
 
 const PORT = process.env.PORT || 3000;
@@ -11,13 +11,8 @@ if (!apiKey) {
 
 const ai = new GoogleGenAI({ apiKey });
 
-let chat = ai.chats.create({
-  model: "gemini-3.6-flash",
-  config: {
-    systemInstruction:
-      "Your name is baiyou AI. You are a helpful, intelligent and friendly personal AI assistant."
-  }
-});
+const MODEL = "gemini-3.6-flash";
+let lastInteractionId = null;
 
 const html = `<!DOCTYPE html>
 <html>
@@ -169,8 +164,29 @@ async function sendMessage() {
     const response = await fetch("/api/chat", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
-      },
+if (!response.ok) {
+  const error = new Error(data.error || "Request failed");
+  error.code = data.code;
+  throw error;
+}
+
+thinking.textContent = data.reply;
+thinking.className = "msg ai";
+
+} catch (error) {
+  thinking.className = "msg ai";
+
+  if (error.code === "QUOTA_EXCEEDED") {
+    thinking.textContent =
+      "Baiyou AI is temporarily unavailable.\n\n" +
+      "The Gemini API daily limit has been reached. " +
+      "Please try again after the quota resets.";
+  } else {
+    thinking.textContent =
+      "Baiyou AI couldn't process your request right now.\n\n" +
+      error.message;
+  }
+}      },
       body: JSON.stringify({
         message: text
       })
@@ -194,13 +210,51 @@ async function sendMessage() {
   input.focus();
 }
 
-send.addEventListener("click", sendMessage);
+sendl.addEventListener("click", sendMessage);
 
 input.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && !event.shiftKey) {
     event.preventDefault();
     sendMessage();
+  }const data = await response.json();
+
+if (!response.ok) {
+  throw new Error(data.error || "Request failed");
+}
+
+thinking.textContent = data.reply;
+thinking.className = "msg ai";
+
+} catch (error) {
+  thinking.textContent = "Error: " + error.message;
+  thinking.className = "msg ai";
+}
+const data = await response.json();
+
+if (!response.ok) {
+  const error = new Error(data.error || "Request failed");
+  error.code = data.code;
+  throw error;
+}
+
+thinking.textContent = data.reply;
+thinking.className = "msg ai";
+
+} catch (error) {
+  thinking.className = "msg ai";
+
+  if (error.code === "QUOTA_EXCEEDED") {
+    thinking.textContent =
+      "Baiyou AI is temporarily unavailable.\n\n" +
+      "The Gemini API daily limit has been reached. " +
+      "Please try again after the quota resets.";
+  } else {
+    thinking.textContent =
+      "Baiyou AI couldn't process your request right now.\n\n" +
+      error.message;
   }
+}
+
 });
 
 newChat.addEventListener("click", async () => {
@@ -275,13 +329,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.method === "POST" && req.url === "/api/new") {
-    chat = ai.chats.create({
-      model: "gemini-3.6-flash",
-      config: {
-        systemInstruction:
-          "Your name is baiyou AI. You are a helpful, intelligent and friendly personal AI assistant."
-      }
-    });
+    lastInteractionId = null;
 
     res.writeHead(200, {
       "Content-Type": "application/json"
@@ -310,16 +358,22 @@ const server = http.createServer(async (req, res) => {
           throw new Error("Message is empty.");
         }
 
-        const response = await chat.sendMessage({
-          message
+        const interaction = await ai.interactions.create({
+          model: MODEL,
+          input: message,
+          previous_interaction_id: lastInteractionId || undefined,
+          system_instruction:
+            "Your name is baiyou AI. You are a helpful, intelligent and friendly personal AI assistant."
         });
+
+        lastInteractionId = interaction.id;
 
         res.writeHead(200, {
           "Content-Type": "application/json"
         });
 
         res.end(JSON.stringify({
-          reply: response.text
+          reply: interaction.output_text
         }));
 
       } catch (error) {
