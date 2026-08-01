@@ -1,4 +1,8 @@
 import http from "http";
+
+
+
+import fs from "fs";
 import Groq from "groq-sdk";
 
 const PORT = process.env.PORT || 3000;
@@ -22,7 +26,35 @@ let messages = [
 
 const server = http.createServer(async (req, res) => {
 
+  if (req.method === "GET" && req.url === "/") {
+    const html = fs.readFileSync("./index.html");
+    res.writeHead(200, {
+      "Content-Type": "text/html"
+    });
+    res.end(html);
+    return;
+  }
+
+  if (req.method === "GET" && req.url === "/style.css") {
+    const css = fs.readFileSync("./style.css");
+    res.writeHead(200, {
+      "Content-Type": "text/css"
+    });
+    res.end(css);
+    return;
+  }
+
+  if (req.method === "GET" && req.url === "/app.js") {
+    const js = fs.readFileSync("./app.js");
+    res.writeHead(200, {
+      "Content-Type": "application/javascript"
+    });
+    res.end(js);
+    return;
+  }
+
   if (req.method === "POST" && req.url === "/api/chat") {
+
     let body = "";
 
     req.on("data", chunk => {
@@ -43,8 +75,7 @@ const server = http.createServer(async (req, res) => {
           messages
         });
 
-        const reply =
-          completion.choices[0].message.content;
+        const reply = completion.choices[0].message.content;
 
         messages.push({
           role: "assistant",
@@ -73,12 +104,9 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  res.writeHead(404);
+  res.end("Not Found");
 
-  res.writeHead(200, {
-    "Content-Type": "text/plain"
-  });
-
-  res.end("Baiyou AI is running");
 });
 
 
