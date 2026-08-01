@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Baiyou AI</title>
 
   <link rel="manifest" href="/manifest.json">
@@ -11,38 +12,60 @@
 
 <body>
 
+<div class="app">
+
 <header class="topbar">
-  <div class="logo">
-    🐶 Baiyou AI
+
+  <div class="brand">
+    <div class="logo">🐶</div>
+    <div>
+      <h1>Baiyou AI</h1>
+      <p>Your personal AI assistant</p>
+    </div>
   </div>
 
-  <button id="newChat">New Chat</button>
+  <button id="newChat">
+    ＋ New
+  </button>
+
 </header>
+
 
 <main id="chat">
 
-  <div class="message ai">
-    Hello! I'm <b>Baiyou AI</b>.<br><br>
-    How can I help you today?
+  <div class="message ai welcome">
+    <h2>👋 Hello!</h2>
+    <p>
+      I'm <b>Baiyou AI</b>.<br>
+      Your intelligent and friendly AI assistant.
+    </p>
+
+    <span>
+      Ask me anything...
+    </span>
   </div>
 
 </main>
 
+
 <footer class="bottom">
 
   <textarea
-      id="prompt"
-      placeholder="Message Baiyou AI..."
+    id="prompt"
+    rows="1"
+    placeholder="Message Baiyou AI..."
   ></textarea>
 
   <button id="send">
-    Send
+    ➤
   </button>
 
 </footer>
+
+</div>
+
 
 <script src="/app.js"></script>
 
 </body>
 </html>
-
